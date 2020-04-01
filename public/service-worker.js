@@ -1,7 +1,7 @@
-var CACHE_NAME = "budget-app-cache-v1";
+var CACHE_NAME = "my-site-cache-v1";
 const DATA_CACHE_NAME = "data-cache-v1";
 
-var routesToCache = [
+var urlsToCache = [
   "/",
   "/db.js",
   "/index.js",
@@ -11,24 +11,24 @@ var routesToCache = [
   "/icons/icon-512x512.png"
 ];
 
-// Install service worker
 self.addEventListener("install", function(event) {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       console.log("Opened cache");
-      return cache.addAll(routesToCache);
+      return cache.addAll(urlsToCache);
     })
   );
 });
 
-// Fetch api routes
 self.addEventListener("fetch", function(event) {
+  // cache all get requests to /api routes
   if (event.request.url.includes("/api/")) {
     event.respondWith(
       caches.open(DATA_CACHE_NAME).then(cache => {
         return fetch(event.request)
           .then(response => {
-//Clone and store in cache
+            // If the response was good, clone it and store it in the cache.
             if (response.status === 200) {
               cache.put(event.request.url, response.clone());
             }
@@ -36,6 +36,7 @@ self.addEventListener("fetch", function(event) {
             return response;
           })
           .catch(err => {
+            // Network request failed, try to get it from the cache.
             return cache.match(event.request);
           });
       }).catch(err => console.log(err))
@@ -50,6 +51,7 @@ self.addEventListener("fetch", function(event) {
         if (response) {
           return response;
         } else if (event.request.headers.get("accept").includes("text/html")) {
+          // return the cached home page for all requests for html pages
           return caches.match("/");
         }
       });

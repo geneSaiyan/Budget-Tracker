@@ -1,10 +1,9 @@
-let db_budget;
-
+var db_budget;
 const request = indexedDB.open("budget", 1);
 
 request.onupgradeneeded = ({ target }) => {
-  let db_budget = target.result;
-  db_budget.createObjectStore("pending", { autoIncrement: true });
+  let db = target.result;
+  db.createObjectStore("pending", { autoIncrement: true });
 };
 
 request.onsuccess = ({ target }) => {
@@ -16,7 +15,7 @@ request.onsuccess = ({ target }) => {
 };
 
 request.onerror = function(event) {
-  console.log("Error " + event.target.errorCode);
+  console.log("Woops! " + event.target.errorCode);
 };
 
 function saveRecord(record) {
